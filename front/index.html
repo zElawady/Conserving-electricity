@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Studio</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2><ion-icon name="analytics-outline"></ion-icon> ML Studio</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-btn active" data-page="upload"><ion-icon name="cloud-upload-outline"></ion-icon>
+                    Smart Upload</button>
+                <button class="nav-btn" data-page="visualization"><ion-icon name="bar-chart-outline"></ion-icon>
+                    Visualization</button>
+                <button class="nav-btn" data-page="preprocessing"><ion-icon name="hammer-outline"></ion-icon>
+                    Preprocessing</button>
+                <button class="nav-btn" data-page="model"><ion-icon name="hardware-chip-outline"></ion-icon> Train
+                    Model</button>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <!-- Smart Upload -->
+            <section id="upload" class="page active">
+                <header class="page-header">
+                    <h1>Smart Upload</h1>
+                    <p>Load your dataset and get instant technical insights.</p>
+                </header>
+                <div class="card">
+                    <div class="upload-area" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                        <input type="file" id="file-input" hidden accept=".csv">
+                        <ion-icon name="cloud-upload-outline"></ion-icon>
+                        <h3>Ready to process datasets</h3>
+                        <p style="margin-bottom: 2.5rem; color: #94a3b8;">Drag and drop your CSV file here, or click to
+                            browse</p>
+                        <button class="btn-upload">BROWSE COMPUTER</button>
+                    </div>
+                </div>
+                <div id="upload-report" class="hidden">
+                    <div class="card">
+                        <h2 style="margin-bottom: 1.5rem;">Technical Report</h2>
+                        <div id="report-summary" style="margin-bottom: 1.5rem; color: #94a3b8;"></div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                            <div>
+                                <h4 style="color:#64748b; margin-bottom:0.8rem; font-size:0.75rem;">NUMERICAL FEATURES
+                                </h4>
+                                <div id="num-cols"></div>
+                            </div>
+                            <div>
+                                <h4 style="color:#64748b; margin-bottom:0.8rem; font-size:0.75rem;">CATEGORICAL FEATURES
+                                </h4>
+                                <div id="cat-cols"></div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1.5rem;">
+                            <h4 style="color:#64748b; margin-bottom:0.8rem; font-size:0.75rem;">MISSING VALUES</h4>
+                            <div id="missing-vals" style="margin-bottom: 1.5rem;"></div>
+                        </div>
+                        <div style="border-top: 1px solid var(--border); padding-top: 1.5rem;">
+                            <h4 style="color:#fff; margin-bottom:0.8rem; font-size:0.9rem;">CHOOSE TASK TYPE</h4>
+                            <div style="display: flex; gap: 1rem;">
+                                <select id="manual-task-type" style="max-width:300px; margin-top:0;" onchange="updateTaskType(this.value)">
+                                    <option value="Classification">Classification</option>
+                                    <option value="Regression">Regression</option>
+                                    <option value="Clustering">Clustering</option>
+                                </select>
+                                <div id="task-status-info" style="display: flex; align-items: center; color: var(--success); font-size: 0.85rem;">
+                                    <ion-icon name="checkmark-done-outline" style="margin-right: 0.4rem; font-size: 1.2rem;"></ion-icon>
+                                    Task type auto-detected
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Dataset Preview</h3>
+                        <div class="data-table-container">
+                            <table class="data-table" id="data-preview"></table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Visualization -->
+            <section id="visualization" class="page">
+                <header class="page-header">
+                    <h1>Data Visualization</h1>
+                </header>
+                <div class="visualization-layout">
+                    <div class="viz-sidebar">
+                        <div class="card">
+                            <h3>Chart Settings</h3>
+                            <label>Plot Type</label><select id="viz-type">
+                                <option value="line">Line Plot</option>
+                                <option value="scatter">Scatter Plot</option>
+                                <option value="box">Box Plot</option>
+                            </select>
+                            <label style="display:block; margin-top:1rem;">X-Axis</label><select id="viz-x"
+                                class="dynamic-cols"></select>
+                            <label style="display:block; margin-top:1rem;">Y-Axis</label><select id="viz-y"
+                                class="dynamic-cols"></select>
+                            <button class="btn-upload w-100" style="margin-top:1.5rem;"
+                                onclick="generatePlot()">Generate Plot</button>
+                        </div>
+                    </div>
+                    <div class="viz-main">
+                        <div id="plot-result"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Preprocessing -->
+            <section id="preprocessing" class="page">
+                <div class="card"
+                    style="padding: 2rem; border-left: 5px solid var(--primary); background: #1e293b; margin-bottom: 2.5rem;">
+                    <h2 style="color: #fff;">About this Workbench</h2>
+                    <p style="color: #94a3b8; font-size: 1.1rem;">Perform essential data cleaning steps. Each step
+                        updates your dataset in real-time.</p>
+                </div>
+                <div class="preprocessing-layout">
+                    <div class="prep-sidebar">
+                        <div class="card">
+                            <h3>Encoding</h3><select id="prep-encode-col" class="dynamic-cols"></select><select
+                                id="prep-encode-method">
+                                <option value="label_encode">Label Encoder</option>
+                                <option value="one_hot">One-Hot Encoder</option>
+                            </select><button class="btn-upload w-100"
+                                onclick="applyPreprocessing('prep-encode-method', 'prep-encode-col')">Apply</button>
+                        </div>
+                        <div class="card">
+                            <h3>Normalization</h3><select id="prep-scale-col" class="dynamic-cols"></select><select
+                                id="prep-scale-method">
+                                <option value="standard_scaler">Standard Scaler</option>
+                                <option value="min_max_scaler">Min-Max Scaler</option>
+                            </select><button class="btn-upload w-100"
+                                onclick="applyPreprocessing('prep-scale-method', 'prep-scale-col')">Apply</button>
+                        </div>
+                        <div class="card">
+                            <h3>Missing Values</h3><select id="prep-missing-col" class="dynamic-cols"></select><select
+                                id="prep-missing-method">
+                                <option value="simple_impute">Simple Imputer</option>
+                                <option value="knn_impute">KNN Imputer</option>
+                                <option value="iterative_impute">Iterative Imputer</option>
+                            </select><button class="btn-upload w-100"
+                                onclick="applyPreprocessing('prep-missing-method', 'prep-missing-col')">Apply</button>
+                        </div>
+                        <div class="card">
+                            <h3>Outliers</h3><select id="prep-outlier-method">
+                                <option value="outlier_iqr">IQR Detection</option>
+                                <option value="outlier_zscore">Z-Score</option>
+                                <option value="outlier_winsor">Winsorization</option>
+                                <option value="outlier_clip">Clipping</option>
+                            </select><button class="btn-upload w-100"
+                                onclick="applyPreprocessing('prep-outlier-method', null)">Apply</button>
+                        </div>
+                        <div class="card">
+                            <h3>Transformation</h3><select id="prep-trans-col" class="dynamic-cols"></select><select
+                                id="prep-trans-method">
+                                <option value="log_transform">Log Transform</option>
+                                <option value="boxcox_transform">Box-Cox</option>
+                                <option value="power_transform">Power Transform</option>
+                                <option value="poly_features">Polynomial Features</option>
+                            </select><button class="btn-upload w-100"
+                                onclick="applyPreprocessing('prep-trans-method', 'prep-trans-col')">Apply</button>
+                        </div>
+                        <div class="card">
+                            <h3>Selection</h3><select id="prep-select-col" class="dynamic-cols"></select><select
+                                id="prep-select-method">
+                                <option value="rfe">RFE</option>
+                                <option value="pca">PCA</option>
+                            </select><button class="btn-upload w-100"
+                                onclick="applyPreprocessing('prep-select-method', 'prep-select-col')">Apply</button>
+                        </div>
+                        <div class="card">
+                            <h3>Imbalanced Data</h3><select id="prep-balance-col" class="dynamic-cols"></select><select
+                                id="prep-balance-method">
+                                <option value="smote">SMOTE</option>
+                                <option value="undersampling">Undersampling</option>
+                            </select><button class="btn-upload w-100"
+                                onclick="applyPreprocessing('prep-balance-method', 'prep-balance-col')">Apply</button>
+                        </div>
+                    </div>
+                    <div class="prep-main">
+                        <div id="prep-status" class="status-card-full"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Model Selection & Training - MATCH SCREENSHOT 8 -->
+            <section id="model" class="page">
+                <header class="page-header">
+                    <span
+                        style="background:rgba(99, 102, 241, 0.2); color:var(--primary); padding:0.4rem 1rem; border-radius:20px; font-size:0.75rem; font-weight:700;">STEP
+                        4 OF 5</span>
+                    <h1 style="margin-top:1rem">🤖 Model Selection & Training</h1>
+                    <p>Smart target detection automatically filters compatible models and warns about mismatches.</p>
+                </header>
+
+                <div style="display:grid; grid-template-columns: 1fr 400px; gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div class="card">
+                        <h4 style="margin-bottom:1.5rem; color:#fff">Training Configuration</h4>
+                        <label id="target-label">Target Column</label>
+                        <select id="model-target" class="dynamic-cols"></select>
+                        <div id="task-type-badge"></div>
+                        <div style="margin-top:1.5rem;">
+                            <label>Force Task Type</label>
+                            <select id="model-task-type" onchange="updateTaskType(this.value)">
+                                <option value="Classification">Classification</option>
+                                <option value="Regression">Regression</option>
+                                <option value="Clustering">Clustering</option>
+                            </select>
+                        </div>
+                        <label style="display:block; margin-top:1.5rem;">Feature Columns <span
+                                style="font-size:0.75rem; color:var(--text-muted)">(all numerical by
+                                default)</span></label>
+                        <div
+                            style="background:#111827; border:1px solid var(--border); border-radius:0.5rem; margin-top:0.5rem; height:45px; display:flex; align-items:center; padding:0 1rem; color:var(--text-muted); font-size:0.85rem;">
+                            Automatic numerical selection enabled</div>
+                    </div>
+                    <div class="card">
+                        <h4 style="margin-bottom:1.5rem; color:#fff">Selected Model</h4>
+                        <div id="selected-model-info"
+                            style="text-align:center; padding:1.5rem 0; color:var(--text-muted);">
+                            <ion-icon name="construct-outline"
+                                style="font-size:3rem; opacity:0.1; margin-bottom:0.5rem;"></ion-icon>
+                            <p style="font-size:0.9rem;">Click a model card below to select it</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h4 style="margin-bottom:0.5rem; color:#facc15">Choose Algorithm</h4>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:2rem;">Browse and select any algorithm to train your model.</p>
+
+                    <p class="section-label">Supervised — Classification</p>
+                    <div class="model-grid">
+                        <div class="algo-card" onclick="selectModel(this, 'DecisionTree')"><ion-icon
+                                name="leaf-outline"></ion-icon>
+                            <p>Decision Tree</p><span>classification</span>
+                        </div>
+                        <div class="algo-card" onclick="selectModel(this, 'LogisticRegression')"><ion-icon
+                                name="analytics-outline"></ion-icon>
+                            <p>Logistic Regression</p><span>classification</span>
+                        </div>
+                        <div class="algo-card" onclick="selectModel(this, 'SVM')"><ion-icon
+                                name="disc-outline"></ion-icon>
+                            <p>SVM</p><span>classification</span>
+                        </div>
+                        <div class="algo-card" onclick="selectModel(this, 'RandomForest')"><ion-icon
+                                name="bonfire-outline"></ion-icon>
+                            <p>Random Forest</p><span>classification</span>
+                        </div>
+                        <div class="algo-card" onclick="selectModel(this, 'KNN')"><ion-icon
+                                name="search-outline"></ion-icon>
+                            <p>KNN</p><span>classification</span>
+                        </div>
+                        <div class="algo-card" onclick="selectModel(this, 'NaiveBayes')"><ion-icon
+                                name="stats-chart-outline"></ion-icon>
+                            <p>Naive Bayes</p><span>classification</span>
+                        </div>
+                        <div class="algo-card" onclick="selectModel(this, 'ANN')"><ion-icon
+                                name="brain-outline"></ion-icon>
+                            <p>Neural Network</p><span>classification</span>
+                        </div>
+                    </div>
+
+                    <p class="section-label">Supervised — Regression</p>
+                    <div class="model-grid">
+                        <div class="algo-card" onclick="selectModel(this, 'LinearRegression')"><ion-icon
+                                name="trending-up-outline"></ion-icon>
+                            <p>Linear Regression</p><span>regression</span>
+                        </div>
+                    </div>
+
+                    <p class="section-label">Unsupervised — Clustering</p>
+                    <div class="model-grid">
+                        <div class="algo-card" onclick="selectModel(this, 'kmeans')"><ion-icon
+                                name="shapes-outline"></ion-icon>
+                            <p>K-Means</p><span>clustering</span>
+                        </div>
+                    </div>
+
+                    <button class="btn-upload w-100" style="margin-top:3rem; background:var(--primary)"
+                        onclick="trainSelectedModel()">TRAIN SELECTED MODEL</button>
+                </div>
+
+                <!-- NEW: Evaluation Result Section Inside Model Page -->
+                <div id="train-report" class="hidden" style="margin-top: 2.5rem;">
+                    <div class="card" style="border:1px solid var(--success); background: rgba(16, 185, 129, 0.05);">
+                        <h2 id="task-type-text" style="color:var(--success); margin-bottom: 1.5rem; font-size: 1.4rem;">
+                            📊 Evaluation Report</h2>
+                        <div id="loading-indicator" class="hidden" style="text-align: center; padding: 2rem;">
+                            <ion-icon name="sync-outline"
+                                style="font-size: 3rem; animation: rotate 2s linear infinite; color:var(--primary);"></ion-icon>
+                            <p style="margin-top: 1rem; color:var(--text-muted);">Analyzing model performance...</p>
+                        </div>
+                        <div class="data-table-container" style="border:none; margin-top:0;">
+                            <table class="data-table" id="eval-table"></table>
+                        </div>
+                        <div id="cm-container" style="margin-top:2rem; text-align:center;"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
